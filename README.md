@@ -4,6 +4,9 @@ Web app financiera de AztroTech: centro de deudas interactivo, plan de ventas,
 simulador de ingresos, recompensas y seguimiento. Ahora con **login en la nube**,
 **instalable como app (PWA)** y **alertas + histórico de deuda**.
 
+🔗 **En vivo:** https://cesaraztro.github.io/aztrotech.presupuesto/
+(Supabase ya está conectado: entra con "Crear una", tu correo y una contraseña.)
+
 > La app **funciona tal cual** abriéndola sin configurar nada (modo local, sin
 > guardar). Para guardar en la nube y entrar con usuario, configura Supabase (abajo).
 
