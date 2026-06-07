@@ -1,5 +1,5 @@
 /* AztroTech Presupuesto — Service Worker (PWA offline) */
-const CACHE = "azt-presupuesto-v1";
+const CACHE = "azt-presupuesto-v2";
 
 // Shell + librerías de CDN para arranque offline
 const ASSETS = [
