@@ -660,6 +660,7 @@ h1,h2,h3,.sec-title,.db-sec-title,.card-title {
 }
 #auth-overlay.show .auth-card { transform: translateY(0) scale(1); }
 .auth-logo { height: 30px; margin-bottom: 18px; }
+.auth-logo-text { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: 7px; font-size: 22px; color: #fff; margin-bottom: 16px; padding-left: 7px; }
 .auth-title { color: #fff; font-size: 20px; font-weight: 900; letter-spacing: .5px; font-family: var(--az-font-hd, inherit); }
 .auth-sub { color: rgba(255,255,255,.55); font-size: 12px; margin: 6px 0 22px; }
 .auth-field { position: relative; margin-bottom: 14px; text-align: left; }
@@ -789,15 +790,7 @@ html { scroll-behavior: smooth; }
 <!-- ═══════════ LOGIN OVERLAY ═══════════ -->
 <div id="auth-overlay">
   <div class="auth-card">
-    <svg class="auth-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296.88 140.06" height="30">
-      <path fill="#fff" d="M1489.21,440.27h9.55v63.17h93.46V440.37h9.48V577.82h-9.33V573c0-18.9,0-37.8.05-56.71,0-3-.61-4.17-3.94-4.15-28.69.13-57.38.07-86.07.09-1,0-2.06.17-3.52.3v65.34h-9.68Z" transform="translate(-304.81 -439.12)"/>
-      <path fill="#fff" d="M560.24,448.67H465.6v-8.31H573.27a11,11,0,0,1-2.4,10.21q-45.35,57.51-90.43,115.24c-.72.92-1.36,1.9-2.44,3.4h97.64v8.57H464.27c-.7-3.38-.49-6.33,1.94-9.4q45.39-57.48,90.55-115.16C557.71,452,558.63,450.78,560.24,448.67Z" transform="translate(-304.81 -439.12)"/>
-      <path fill="#fff" d="M751.4,577.93h-9.28V524.27h4.2c16.2,0,32.41.2,48.6-.18a67.24,67.24,0,0,0,17.6-2.74c19.21-5.82,26.26-21.15,24.7-38.49-1.74-19.46-14.24-31.64-34.69-33.28-13.73-1.09-27.58-.71-41.38-.92-6.22-.1-12.44,0-19,0v-8.27a26.22,26.22,0,0,1,2.93-.33c17.26,0,34.53-.2,51.79.16,11.42.24,22.36,2.87,32,9.43,11.25,7.66,17.59,18.33,18.11,31.84a68.1,68.1,0,0,1-1.86,19.95c-3.29,12.31-11.58,20.82-23.4,25.83-2.06.88-4.17,1.65-6.88,2.72l34,47.4c-7.44,2.07-10.22,1.17-14.23-4.42-8.86-12.36-17.81-24.67-26.54-37.14-2-2.91-3.95-4.06-7.76-3.49-5.08.77-10.33.41-15.51.43-9.43,0-18.85,0-28.28,0-5.07,0-5.07,0-5.08,5.24v39.92Z" transform="translate(-304.81 -439.12)"/>
-      <path fill="#fff" d="M1437.43,554l5.38,5.73c-17.07,21.52-65,28.28-95.54,4-32.38-25.8-32.54-76-6.87-102.92,28.75-30.19,81.15-26.72,102.68-2.76l-5.84,6.12c-15.54-14.22-33.87-18.44-54-15.35-14.64,2.25-27.2,8.81-36.93,20.11-19.73,22.9-19.32,58.3.14,80.87S1410.52,579.91,1437.43,554Z" transform="translate(-304.81 -439.12)"/>
-      <path fill="#fff" d="M373.19,450.67c-.92,1.85-1.59,3.07-2.17,4.34q-26.62,58.39-53.23,116.78c-3.26,7.15-4.32,7.65-13,5.81.49-1.24.91-2.47,1.46-3.64,20.06-43.39,40.21-86.74,60.06-130.22,1.94-4.24,4.78-3.42,7.93-3.79,3.33-.38,4.54,1.25,5.78,3.95q29.88,65,59.93,129.83c.59,1.28,1.1,2.6,1.88,4.42-3.23,0-5.93.35-8.46-.14-1.28-.25-2.69-1.84-3.3-3.16q-20.31-44.07-40.42-88.23C384.29,474.86,378.9,463.11,373.19,450.67Z" transform="translate(-304.81 -439.12)"/>
-      <path fill="#fff" d="M1155,440.4v8.28h-49.83V577.75h-9.79v-129h-50.16V440.4Z" transform="translate(-304.81 -439.12)"/>
-      <path fill="#fff" d="M645.52,448.61h-50v-8.3H704.88v8.16H655.19V577.8h-9.67Z" transform="translate(-304.81 -439.12)"/>
-    </svg>
+    <div class="auth-logo-text">AZTROTECH</div>
     <div class="auth-title">Presupuesto Maestro 2026</div>
     <div class="auth-sub" id="auth-sub">Entra para ver y guardar tus finanzas en la nube</div>
     <div class="auth-field">
@@ -1305,8 +1298,8 @@ html { scroll-behavior: smooth; }
 // ║  (Dashboard de Supabase → Project Settings → API)              ║
 // ╚═══════════════════════════════════════════════════════════════╝
 const SB_CFG = {
-  url:     "TU_SUPABASE_URL",        // ej: https://abcd1234.supabase.co
-  anonKey: "TU_SUPABASE_ANON_KEY"    // la "anon public" key (es segura de exponer)
+  url:     "https://myhuapwttifeqlplikhp.supabase.co",   // Project URL
+  anonKey: "sb_publishable_dvGTPBsAERiNqSoyCl_aww_SV0iwC31"  // publishable key (segura de exponer)
 };
 
 // ── Cliente Supabase (o modo local si aún no está configurado) ──────
