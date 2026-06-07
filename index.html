@@ -8,6 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4A148C">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Presupuesto">
 <style>
   :root {
     --purple: #7B2D8B;
@@ -637,6 +644,116 @@ h1,h2,h3,.sec-title,.db-sec-title,.card-title {
 .db-hero-title { color:#ffffff!important; font-family:var(--az-font-hd)!important; font-weight:900!important; }
 .db-hero-sub   { color:rgba(255,255,255,0.65)!important; }
 
+/* ═══════════ AUTH / LOGIN OVERLAY ═══════════ */
+#auth-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(circle at 30% 20%, #2a1a4a, #1a0f2e 70%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none; transition: opacity .35s ease;
+}
+#auth-overlay.show { opacity: 1; pointer-events: auto; }
+.auth-card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(14px); border-radius: 22px; padding: 34px 30px;
+  width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 60px #0009;
+  transform: translateY(18px) scale(.97); transition: transform .4s cubic-bezier(.2,.9,.3,1.2);
+}
+#auth-overlay.show .auth-card { transform: translateY(0) scale(1); }
+.auth-logo { height: 30px; margin-bottom: 18px; }
+.auth-title { color: #fff; font-size: 20px; font-weight: 900; letter-spacing: .5px; font-family: var(--az-font-hd, inherit); }
+.auth-sub { color: rgba(255,255,255,.55); font-size: 12px; margin: 6px 0 22px; }
+.auth-field { position: relative; margin-bottom: 14px; text-align: left; }
+.auth-field label { display:block; color: rgba(255,255,255,.6); font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.auth-field input {
+  width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.15);
+  background: rgba(0,0,0,.25); color: #fff; font-size: 14px; outline: none; transition: border .2s, box-shadow .2s;
+}
+.auth-field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(249,168,37,.18); }
+.auth-btn {
+  width: 100%; padding: 13px; border: none; border-radius: 12px; cursor: pointer;
+  font-size: 14px; font-weight: 800; letter-spacing: .3px; margin-top: 4px;
+  background: linear-gradient(135deg, var(--gold), #ff8f00); color: #2a1a00; transition: transform .15s, filter .2s;
+}
+.auth-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.auth-btn:disabled { opacity: .6; cursor: wait; }
+.auth-toggle { margin-top: 18px; color: rgba(255,255,255,.55); font-size: 12px; }
+.auth-toggle a { color: var(--gold); cursor: pointer; font-weight: 700; text-decoration: none; }
+.auth-msg { min-height: 18px; margin-top: 12px; font-size: 12px; font-weight: 600; }
+.auth-msg.err { color: #ff8a80; }
+.auth-msg.ok { color: #69f0ae; }
+.auth-spin { display:inline-block; width:14px; height:14px; border:2px solid #2a1a00; border-top-color:transparent; border-radius:50%; animation:spin .7s linear infinite; vertical-align:-2px; margin-right:6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════ SAVE STATUS + USER CHIP (nav) ═══════════ */
+.save-chip { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:#fff; background:rgba(255,255,255,.12); padding:6px 12px; border-radius:20px; transition:background .25s; }
+.save-chip .dot { width:8px; height:8px; border-radius:50%; background:#9e9e9e; transition:background .25s; }
+.save-chip.saving .dot { background:var(--gold); animation:pulse 1s infinite; }
+.save-chip.saved  .dot { background:#69f0ae; }
+.save-chip.dirty  .dot { background:#ffb74d; }
+.save-chip.error  { background:rgba(198,40,40,.35); } .save-chip.error .dot { background:#ff5252; }
+.save-chip.local  .dot { background:#42a5f5; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+.user-chip { display:inline-flex; align-items:center; gap:6px; font-size:11px; color:#fff; background:rgba(255,255,255,.12); padding:6px 10px; border-radius:20px; }
+.user-chip button { background:none; border:none; color:var(--gold); cursor:pointer; font-weight:800; font-size:11px; padding:0; }
+
+/* ═══════════ TOAST ═══════════ */
+#toast-wrap { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9998; display:flex; flex-direction:column; gap:8px; align-items:center; }
+.toast { background: #2e2150; color:#fff; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 28px #0007; border:1px solid rgba(255,255,255,.12); opacity:0; transform: translateY(12px); transition: all .3s; }
+.toast.show { opacity:1; transform: translateY(0); }
+.toast.ok { border-color: rgba(105,240,174,.4); }
+.toast.err { border-color: rgba(255,82,82,.5); }
+
+/* ═══════════ PREMIUM: transición entre pestañas ═══════════ */
+.section.active { animation: tabIn .42s cubic-bezier(.2,.8,.3,1); }
+@keyframes tabIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+/* Entrada escalonada de las tarjetas de la sección activa */
+.section.active .card { animation: cardUp .5s both cubic-bezier(.2,.8,.3,1); }
+.section.active .card:nth-child(1){ animation-delay:.02s } .section.active .card:nth-child(2){ animation-delay:.07s }
+.section.active .card:nth-child(3){ animation-delay:.12s } .section.active .card:nth-child(4){ animation-delay:.17s }
+.section.active .card:nth-child(5){ animation-delay:.22s } .section.active .card:nth-child(n+6){ animation-delay:.27s }
+@keyframes cardUp { from { opacity:0; transform: translateY(14px) scale(.995); } to { opacity:1; transform: translateY(0) scale(1); } }
+
+/* Micro-interacciones */
+.card { transition: transform .2s ease, box-shadow .2s ease; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,.10); }
+.kpi-card { transition: transform .2s ease, box-shadow .25s ease; }
+.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.22); }
+.tab-btn { transition: background .2s, color .2s, transform .12s; }
+.tab-btn:hover { transform: translateY(-1px); }
+.tab-btn:active { transform: translateY(0); }
+.dl-btn { transition: background .2s, transform .12s, filter .2s; }
+.dl-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+button { transition: filter .15s ease, transform .12s ease; }
+
+/* ═══════════ INSIGHTS / ALERTAS (Fase 5) ═══════════ */
+.insights-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; }
+@media(max-width:760px){ .insights-grid { grid-template-columns:1fr; } }
+.ins-col { background:#faf8fd; border:1px solid #efe9f5; border-radius:12px; padding:14px; }
+.ins-sub { font-size:12px; font-weight:800; color:var(--purple); margin-bottom:10px; }
+.ins-alert { display:flex; gap:8px; align-items:flex-start; font-size:12px; padding:8px 10px; border-radius:9px; margin-bottom:7px; line-height:1.35; }
+.ins-alert.warn { background:#fff8e1; color:#9a6a00; }
+.ins-alert.fire { background:#fdecea; color:#b71c1c; }
+.ins-alert.ok   { background:#e8f5e9; color:#2e7d32; }
+.ins-goal-month { font-size:20px; font-weight:900; color:var(--dpurple); }
+.ins-goal-cap   { font-size:11px; color:#777; margin:2px 0 12px; }
+.ins-bar { background:#eee; border-radius:10px; height:12px; overflow:hidden; }
+.ins-bar > div { height:12px; border-radius:10px; background:linear-gradient(90deg,#7B2D8B,#2E7D32); transition:width .6s cubic-bezier(.2,.8,.3,1); }
+.ins-bar-lbl { font-size:11px; color:#555; margin-top:7px; }
+.ins-spark-now { font-size:18px; font-weight:900; color:var(--dpurple); margin-bottom:6px; }
+.ins-spark-cap { font-size:11px; color:#888; margin-top:6px; }
+
+/* Scrollbar discreta */
+::-webkit-scrollbar { height: 9px; width: 9px; }
+::-webkit-scrollbar-thumb { background: rgba(123,45,139,.45); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(123,45,139,.7); }
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  .section.active, .section.active .card { animation: none !important; }
+  .card:hover, .kpi-card:hover, .tab-btn:hover, .dl-btn:hover { transform: none; }
+}
+
 </style>
 </head>
 <body>
@@ -665,7 +782,42 @@ h1,h2,h3,.sec-title,.db-sec-title,.card-title {
   <button class="tab-btn" onclick="showTab('ventas')">Plan Ventas</button>
   <button class="tab-btn" onclick="showTab('simulador')">Simulador</button>
   <button class="dl-btn" onclick="downloadExcel()">⬇ Excel</button>
+  <span id="save-chip" class="save-chip" style="display:none"><span class="dot"></span><span id="save-chip-txt">Guardado</span></span>
+  <span id="user-chip" class="user-chip" style="display:none">👤 <span id="user-email"></span> · <button onclick="doLogout()">Salir</button></span>
 </div>
+
+<!-- ═══════════ LOGIN OVERLAY ═══════════ -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <svg class="auth-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296.88 140.06" height="30">
+      <path fill="#fff" d="M1489.21,440.27h9.55v63.17h93.46V440.37h9.48V577.82h-9.33V573c0-18.9,0-37.8.05-56.71,0-3-.61-4.17-3.94-4.15-28.69.13-57.38.07-86.07.09-1,0-2.06.17-3.52.3v65.34h-9.68Z" transform="translate(-304.81 -439.12)"/>
+      <path fill="#fff" d="M560.24,448.67H465.6v-8.31H573.27a11,11,0,0,1-2.4,10.21q-45.35,57.51-90.43,115.24c-.72.92-1.36,1.9-2.44,3.4h97.64v8.57H464.27c-.7-3.38-.49-6.33,1.94-9.4q45.39-57.48,90.55-115.16C557.71,452,558.63,450.78,560.24,448.67Z" transform="translate(-304.81 -439.12)"/>
+      <path fill="#fff" d="M751.4,577.93h-9.28V524.27h4.2c16.2,0,32.41.2,48.6-.18a67.24,67.24,0,0,0,17.6-2.74c19.21-5.82,26.26-21.15,24.7-38.49-1.74-19.46-14.24-31.64-34.69-33.28-13.73-1.09-27.58-.71-41.38-.92-6.22-.1-12.44,0-19,0v-8.27a26.22,26.22,0,0,1,2.93-.33c17.26,0,34.53-.2,51.79.16,11.42.24,22.36,2.87,32,9.43,11.25,7.66,17.59,18.33,18.11,31.84a68.1,68.1,0,0,1-1.86,19.95c-3.29,12.31-11.58,20.82-23.4,25.83-2.06.88-4.17,1.65-6.88,2.72l34,47.4c-7.44,2.07-10.22,1.17-14.23-4.42-8.86-12.36-17.81-24.67-26.54-37.14-2-2.91-3.95-4.06-7.76-3.49-5.08.77-10.33.41-15.51.43-9.43,0-18.85,0-28.28,0-5.07,0-5.07,0-5.08,5.24v39.92Z" transform="translate(-304.81 -439.12)"/>
+      <path fill="#fff" d="M1437.43,554l5.38,5.73c-17.07,21.52-65,28.28-95.54,4-32.38-25.8-32.54-76-6.87-102.92,28.75-30.19,81.15-26.72,102.68-2.76l-5.84,6.12c-15.54-14.22-33.87-18.44-54-15.35-14.64,2.25-27.2,8.81-36.93,20.11-19.73,22.9-19.32,58.3.14,80.87S1410.52,579.91,1437.43,554Z" transform="translate(-304.81 -439.12)"/>
+      <path fill="#fff" d="M373.19,450.67c-.92,1.85-1.59,3.07-2.17,4.34q-26.62,58.39-53.23,116.78c-3.26,7.15-4.32,7.65-13,5.81.49-1.24.91-2.47,1.46-3.64,20.06-43.39,40.21-86.74,60.06-130.22,1.94-4.24,4.78-3.42,7.93-3.79,3.33-.38,4.54,1.25,5.78,3.95q29.88,65,59.93,129.83c.59,1.28,1.1,2.6,1.88,4.42-3.23,0-5.93.35-8.46-.14-1.28-.25-2.69-1.84-3.3-3.16q-20.31-44.07-40.42-88.23C384.29,474.86,378.9,463.11,373.19,450.67Z" transform="translate(-304.81 -439.12)"/>
+      <path fill="#fff" d="M1155,440.4v8.28h-49.83V577.75h-9.79v-129h-50.16V440.4Z" transform="translate(-304.81 -439.12)"/>
+      <path fill="#fff" d="M645.52,448.61h-50v-8.3H704.88v8.16H655.19V577.8h-9.67Z" transform="translate(-304.81 -439.12)"/>
+    </svg>
+    <div class="auth-title">Presupuesto Maestro 2026</div>
+    <div class="auth-sub" id="auth-sub">Entra para ver y guardar tus finanzas en la nube</div>
+    <div class="auth-field">
+      <label>Correo</label>
+      <input type="email" id="auth-email" placeholder="tu@correo.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Contraseña</label>
+      <input type="password" id="auth-pass" placeholder="••••••••" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')authPrimary()">
+    </div>
+    <button class="auth-btn" id="auth-btn" onclick="authPrimary()">Entrar</button>
+    <div class="auth-msg" id="auth-msg"></div>
+    <div class="auth-toggle" id="auth-toggle">
+      ¿No tienes cuenta? <a onclick="toggleAuthMode()" id="auth-toggle-link">Crear una</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast-wrap"></div>
 
 <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
 <div id="tab-dashboard" class="section active">
@@ -755,6 +907,25 @@ h1,h2,h3,.sec-title,.db-sec-title,.card-title {
       <div class="dhs"><div class="dhs-val" id="dhs-pago">$31,000</div><div class="dhs-lbl">📅 Pago mensual</div></div>
       <div class="dhs"><div class="dhs-val" id="dhs-interes">—</div><div class="dhs-lbl">🔥 Intereses Jun–Dic</div></div>
       <div class="dhs"><div class="dhs-val" id="dhs-liq">—</div><div class="dhs-lbl">✅ Liquidan este año</div></div>
+    </div>
+  </div>
+
+  <!-- ══════ ALERTAS Y SEGUIMIENTO (Fase 5) ══════ -->
+  <div class="card" id="insights-card">
+    <div class="card-title">🔔 Alertas y seguimiento</div>
+    <div class="insights-grid">
+      <div class="ins-col">
+        <div class="ins-sub">⚠️ Alertas</div>
+        <div id="ins-alerts"></div>
+      </div>
+      <div class="ins-col">
+        <div class="ins-sub">🎯 Meta: libre de deudas</div>
+        <div id="ins-goal"></div>
+      </div>
+      <div class="ins-col">
+        <div class="ins-sub">📉 Evolución de tu deuda</div>
+        <div id="ins-spark"></div>
+      </div>
     </div>
   </div>
 
@@ -1129,6 +1300,321 @@ h1,h2,h3,.sec-title,.db-sec-title,.card-title {
 </div>
 
 <script>
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  CONFIGURACIÓN SUPABASE  —  pega aquí tus 2 datos del proyecto  ║
+// ║  (Dashboard de Supabase → Project Settings → API)              ║
+// ╚═══════════════════════════════════════════════════════════════╝
+const SB_CFG = {
+  url:     "TU_SUPABASE_URL",        // ej: https://abcd1234.supabase.co
+  anonKey: "TU_SUPABASE_ANON_KEY"    // la "anon public" key (es segura de exponer)
+};
+
+// ── Cliente Supabase (o modo local si aún no está configurado) ──────
+const SB_READY = SB_CFG.url.startsWith("http") && SB_CFG.anonKey.length > 20;
+const sb = (SB_READY && window.supabase) ? window.supabase.createClient(SB_CFG.url, SB_CFG.anonKey) : null;
+
+let __appReady   = false;   // true cuando la app terminó de cargar (habilita autoguardado)
+let __session    = null;    // sesión activa de Supabase
+let __saveTimer  = null;    // debounce del autoguardado
+let debtSnapshots = [];     // histórico mensual de deuda (Fase 5)
+
+// ── HISTÓRICO DE DEUDA (Fase 5) ────────────────────────────────────
+function currentDebtTotal() {
+  return PROJ_DEBTS.reduce((s, d) => s + (parseFloat(d.saldo) || 0), 0);
+}
+function recordDebtSnapshot() {
+  const today = new Date().toISOString().slice(0, 10);
+  const total = Math.round(currentDebtTotal());
+  const last = debtSnapshots[debtSnapshots.length - 1];
+  if (last && last.date === today) last.total = total;       // actualiza el de hoy
+  else debtSnapshots.push({ date: today, total });           // o agrega uno nuevo
+}
+
+// ── INSIGHTS: alertas + meta libre-de-deudas + sparkline (Fase 5) ──
+function _money(n) { return "$" + Math.round(n || 0).toLocaleString("es-MX"); }
+
+function renderInsights() {
+  const aEl = document.getElementById("ins-alerts");
+  const gEl = document.getElementById("ins-goal");
+  const sEl = document.getElementById("ins-spark");
+  if (!aEl || !gEl || !sEl) return;
+
+  // ── ALERTAS ──
+  const alerts = [];
+  PROJ_DEBTS.forEach(d => {
+    if ((d.saldo || 0) > 0 && (d.pago_min || 0) > 0 && (d.pago || 0) < d.pago_min) {
+      alerts.push({ cls: "warn", html: `<span>⚠️</span><span><b>${d.name}</b>: pagas ${_money(d.pago)} pero el mínimo es ${_money(d.pago_min)}.</span>` });
+    }
+  });
+  let worst = null, worstInt = 0;
+  PROJ_DEBTS.forEach(d => {
+    if ((d.saldo || 0) > 0 && (d.tasa_anual || 0) > 0) {
+      const i = d.saldo * d.tasa_anual / 12 / 100;
+      if (i > worstInt) { worstInt = i; worst = d; }
+    }
+  });
+  if (worst) alerts.push({ cls: "fire", html: `<span>🔥</span><span><b>${worst.name}</b> te cuesta <b>${_money(worstInt)}/mes</b> de interés (${worst.tasa_anual}% anual). Atácala primero.</span>` });
+  PROJ_DEBTS.forEach((d, i) => { const mes = liquidaMesCalc(i); if (mes) alerts.push({ cls: "ok", html: `<span>✅</span><span><b>${d.name}</b> se liquida en <b>${mes} 2026</b>.</span>` }); });
+  if (!alerts.length) alerts.push({ cls: "ok", html: `<span>✅</span><span>Todo en orden. Sin alertas por ahora.</span>` });
+  aEl.innerHTML = alerts.map(a => `<div class="ins-alert ${a.cls}">${a.html}</div>`).join("");
+
+  // ── META: libre de deudas ──
+  const saldosPorDeuda = PROJ_DEBTS.map((_, i) => calcDebtSaldos(i));
+  let freeMonth = null;
+  for (let m = 0; m < 7; m++) {
+    const tot = saldosPorDeuda.reduce((s, arr) => s + (arr[m] || 0), 0);
+    if (tot === 0) { freeMonth = MESES[m]; break; }
+  }
+  const current = currentDebtTotal();
+  const base = debtSnapshots.length ? debtSnapshots[0].total : current;
+  const reduced = Math.max(0, base - current);
+  const pct = base > 0 ? Math.min(100, Math.round(reduced / base * 100)) : 0;
+  gEl.innerHTML = `
+    <div class="ins-goal-month">${freeMonth ? freeMonth + " 2026" : "Después de Dic 2026"}</div>
+    <div class="ins-goal-cap">${freeMonth ? "A este ritmo liquidas TODO en " + freeMonth + "." : "Con los pagos actuales no liquidas todo este año — sube los abonos."}</div>
+    <div class="ins-bar"><div style="width:${pct}%"></div></div>
+    <div class="ins-bar-lbl">Reducido <b>${_money(reduced)}</b> (${pct}%) · Deuda actual <b>${_money(current)}</b></div>`;
+
+  // ── SPARKLINE histórico real ──
+  const pts = debtSnapshots.slice(-30);
+  if (pts.length < 2) {
+    sEl.innerHTML = `<div class="ins-spark-now">${_money(current)}</div>
+      <div class="ins-spark-cap">Tu historial se construye solo: cada día que abras la app se guarda un punto. Vuelve mañana para ver la línea bajar 📉</div>`;
+  } else {
+    const W = 240, H = 70, pad = 5;
+    const vals = pts.map(p => p.total);
+    const mn = Math.min(...vals), mx = Math.max(...vals), rng = (mx - mn) || 1;
+    const xs = i => pad + i * (W - 2 * pad) / (pts.length - 1);
+    const ys = v => pad + (1 - (v - mn) / rng) * (H - 2 * pad);
+    const line = pts.map((p, i) => `${i ? "L" : "M"}${xs(i).toFixed(1)},${ys(p.total).toFixed(1)}`).join(" ");
+    const area = `M${xs(0).toFixed(1)},${(H - pad).toFixed(1)} ` + pts.map((p, i) => `L${xs(i).toFixed(1)},${ys(p.total).toFixed(1)}`).join(" ") + ` L${xs(pts.length - 1).toFixed(1)},${(H - pad).toFixed(1)} Z`;
+    const diff = pts[pts.length - 1].total - pts[0].total;
+    const down = diff <= 0;
+    sEl.innerHTML = `<div class="ins-spark-now">${_money(pts[pts.length - 1].total)}</div>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="70" preserveAspectRatio="none">
+        <path d="${area}" fill="rgba(46,125,50,.12)"/>
+        <path d="${line}" fill="none" stroke="${down ? "#2E7D32" : "#c62828"}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <div class="ins-spark-cap">${down ? "↓ Bajó" : "↑ Subió"} ${_money(Math.abs(diff))} desde ${pts[0].date}</div>`;
+  }
+}
+
+// ── SERIALIZAR / APLICAR ESTADO ────────────────────────────────────
+function serializeState() {
+  return {
+    version: 1,
+    debts: PROJ_DEBTS,
+    planData: PLAN_DATA,
+    projOverrides: projOverrides,
+    ventas: allVentas,
+    alianzas: allAlianzas,
+    recompensas: recompensas,
+    wishlist: wishlistItems,
+    snowballTargetIdx: snowballTargetIdx,
+    simMes: simMes,
+    snapshots: debtSnapshots,
+    savedAt: new Date().toISOString()
+  };
+}
+
+function _maxIdOver(obj) {
+  let mx = 0;
+  Object.values(obj || {}).forEach(mes => Object.keys(mes || {}).forEach(k => { if (+k > mx) mx = +k; }));
+  return mx;
+}
+
+function applyState(s) {
+  if (!s) return;
+  // Datos base
+  if (Array.isArray(s.debts))    { PROJ_DEBTS.length = 0; s.debts.forEach(d => PROJ_DEBTS.push(d)); }
+  if (Array.isArray(s.planData)) { PLAN_DATA.length = 0;  s.planData.forEach(p => PLAN_DATA.push(p)); }
+  if (Array.isArray(s.projOverrides) && s.projOverrides.length === PROJ_DEBTS.length) projOverrides = s.projOverrides;
+  else initProjOverrides();
+
+  snowballTargetIdx = s.snowballTargetIdx || 0;
+  simMes = (s.simMes && MESES.includes(s.simMes)) ? s.simMes : "Jun";
+  debtSnapshots = Array.isArray(s.snapshots) ? s.snapshots : [];
+
+  // Ventas / alianzas por mes
+  MESES.forEach(m => {
+    allVentas[m]   = (s.ventas   && s.ventas[m])   ? s.ventas[m]   : {};
+    allAlianzas[m] = (s.alianzas && s.alianzas[m]) ? s.alianzas[m] : {};
+  });
+  ventaCount   = _maxIdOver(allVentas);
+  alianzaCount = _maxIdOver(allAlianzas);
+  ventas   = allVentas[simMes];
+  alianzas = allAlianzas[simMes];
+
+  // Recompensas
+  Object.keys(recompensas).forEach(k => delete recompensas[k]);
+  recompCount = 0;
+  const rc = document.getElementById("recomp-rows"); if (rc) rc.innerHTML = "";
+  const recArr = Array.isArray(s.recompensas) ? s.recompensas : Object.values(s.recompensas || {});
+  recArr.forEach(r => addRecompensa(r.nombre, r.costo, r.trigger, r.emoji, r.tipo));
+
+  // Wishlist
+  if (Array.isArray(s.wishlist)) {
+    wishlistItems = s.wishlist;
+    wishlistCount = wishlistItems.reduce((mx, w) => Math.max(mx, w.id || 0), 0);
+  } else { initWishlist(); }
+
+  // Reconstruir TODA la UI desde los datos cargados
+  buildVentas();
+  buildMesBar();
+  buildSnowTargetSelect();
+  buildDebtCardsGrid();
+  buildDeudaEditor();
+  const vl = document.getElementById("ventas-log"); if (vl) { vl.innerHTML = ""; Object.keys(ventas).forEach(id => buildVentaDOM(+id, ventas[id])); }
+  const al = document.getElementById("alianzas-rows"); if (al) { al.innerHTML = ""; Object.keys(alianzas).forEach(id => buildAlianzaDOM(+id, alianzas[id])); }
+  buildRecompensasTab();
+  calcSim();
+  buildDashboard();
+}
+
+// ── GUARDAR / CARGAR (Supabase) ────────────────────────────────────
+async function saveState() {
+  if (!__session || !sb) return;
+  setSaveStatus("saving");
+  const { error } = await sb.from("presupuestos").upsert({
+    user_id: __session.user.id,
+    state: serializeState(),
+    updated_at: new Date().toISOString()
+  });
+  setSaveStatus(error ? "error" : "saved");
+  if (error) console.error("saveState:", error);
+}
+
+function scheduleSave() {
+  if (!__appReady || !__session || !sb) return;
+  setSaveStatus("dirty");
+  clearTimeout(__saveTimer);
+  __saveTimer = setTimeout(saveState, 1500);
+}
+
+async function loadState() {
+  if (!sb || !__session) return null;
+  const { data, error } = await sb.from("presupuestos")
+    .select("state").eq("user_id", __session.user.id).maybeSingle();
+  if (error) { console.error("loadState:", error); return null; }
+  return data ? data.state : null;
+}
+
+function setSaveStatus(kind) {
+  const chip = document.getElementById("save-chip");
+  const txt  = document.getElementById("save-chip-txt");
+  if (!chip || !txt) return;
+  chip.style.display = "inline-flex";
+  chip.className = "save-chip " + kind;
+  txt.textContent = { saving:"Guardando…", saved:"Guardado", dirty:"Sin guardar", error:"Error al guardar", local:"Modo local" }[kind] || "";
+}
+
+// ── ARRANQUE DE LA APP ─────────────────────────────────────────────
+function bootApp(state) {
+  buildVentas();
+  buildSim(!state);          // siembra defaults solo si NO hay estado guardado
+  if (state) applyState(state);
+  recordDebtSnapshot();      // registra el total de deuda de hoy (histórico)
+  renderInsights();          // refresca alertas/meta/sparkline con el snapshot ya incluido
+  __appReady = true;
+  // Red de seguridad: cualquier edición en inputs dispara el autoguardado
+  document.addEventListener("input",  scheduleSave, true);
+  document.addEventListener("change", scheduleSave, true);
+}
+
+async function enterApp(session) {
+  __session = session;
+  hideLogin();
+  document.getElementById("user-chip").style.display = "inline-flex";
+  document.getElementById("user-email").textContent = session.user.email || "";
+  const state = await loadState();
+  bootApp(state);
+  if (!state) { await saveState(); }   // primera vez: siembra la fila del usuario
+  setSaveStatus("saved");
+  toast("Bienvenido de vuelta 👋", "ok");
+}
+
+// ── LOGIN / SIGNUP UI ──────────────────────────────────────────────
+let authMode = "login";
+function showLogin()  { document.getElementById("auth-overlay").classList.add("show"); }
+function hideLogin()  { document.getElementById("auth-overlay").classList.remove("show"); }
+function authMsg(m, cls="") { const el = document.getElementById("auth-msg"); el.textContent = m; el.className = "auth-msg " + cls; }
+
+function toggleAuthMode() {
+  authMode = authMode === "login" ? "signup" : "login";
+  document.getElementById("auth-btn").textContent = authMode === "login" ? "Entrar" : "Crear cuenta";
+  document.getElementById("auth-toggle-link").textContent = authMode === "login" ? "Crear una" : "Iniciar sesión";
+  document.getElementById("auth-toggle").childNodes[0].nodeValue = authMode === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? ";
+  document.getElementById("auth-sub").textContent = authMode === "login"
+    ? "Entra para ver y guardar tus finanzas en la nube"
+    : "Crea tu cuenta para empezar a guardar en la nube";
+  authMsg("");
+}
+
+async function authPrimary() {
+  const email = document.getElementById("auth-email").value.trim();
+  const pass  = document.getElementById("auth-pass").value;
+  if (!email || !pass) { authMsg("Escribe correo y contraseña.", "err"); return; }
+  if (pass.length < 6) { authMsg("La contraseña debe tener al menos 6 caracteres.", "err"); return; }
+  const btn = document.getElementById("auth-btn");
+  btn.disabled = true;
+  const prev = btn.textContent;
+  btn.innerHTML = '<span class="auth-spin"></span>' + (authMode === "login" ? "Entrando…" : "Creando…");
+  try {
+    if (authMode === "login") {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) { authMsg(traducirAuthError(error.message), "err"); return; }
+      await enterApp(data.session);
+    } else {
+      const { data, error } = await sb.auth.signUp({ email, password: pass });
+      if (error) { authMsg(traducirAuthError(error.message), "err"); return; }
+      if (data.session) { await enterApp(data.session); }
+      else { authMsg("Cuenta creada. Revisa tu correo para confirmar y luego inicia sesión.", "ok"); authMode = "signup"; }
+    }
+  } catch (e) {
+    authMsg("Error de conexión. Intenta de nuevo.", "err"); console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = prev;
+  }
+}
+
+function traducirAuthError(msg) {
+  msg = (msg || "").toLowerCase();
+  if (msg.includes("invalid login")) return "Correo o contraseña incorrectos.";
+  if (msg.includes("already registered") || msg.includes("already exists")) return "Ese correo ya tiene cuenta. Inicia sesión.";
+  if (msg.includes("email not confirmed")) return "Confirma tu correo antes de entrar.";
+  return "No se pudo completar. Intenta de nuevo.";
+}
+
+async function doLogout() {
+  if (sb) await sb.auth.signOut();
+  location.reload();
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────
+function toast(msg, type="") {
+  const wrap = document.getElementById("toast-wrap");
+  if (!wrap) return;
+  const t = document.createElement("div");
+  t.className = "toast " + type;
+  t.textContent = msg;
+  wrap.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("show"));
+  setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 350); }, 2600);
+}
+
+// ── INICIO: decide login vs modo local ─────────────────────────────
+async function initAuth() {
+  if (!sb) {
+    // Sin Supabase configurado → la app funciona localmente (sin guardar en la nube)
+    bootApp(null);
+    setSaveStatus("local");
+    return;
+  }
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { await enterApp(session); }
+  else { showLogin(); }
+}
+
 // ═══ DATA ═══
 const MESES = ["Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
@@ -1444,6 +1930,7 @@ function refreshVdConnector() {
 }
 
 function refreshProj() {
+  scheduleSave();
   const pbody = document.getElementById("proj-body");
   if (pbody) pbody.innerHTML = "";
 
@@ -1548,6 +2035,9 @@ function refreshProj() {
 
   // ── Hero stats ──
   refreshDeudasHero();
+
+  // ── Alertas y seguimiento (Fase 5) ──
+  renderInsights();
 
   // ── Dashboard ultra ──
   buildDashboard();
@@ -2230,15 +2720,17 @@ function removeRecomp(id) {
 }
 
 // ════ BUILD SIM ════
-function buildSim() {
+function buildSim(seed = true) {
   initProjOverrides();
   buildMesBar();
   buildSnowTargetSelect();
   buildDebtCardsGrid();
   buildDeudaEditor();
-  addVenta("mentoria", 1800, "");
-  addAlianza("BNI — referidos del mes", 0);
-  buildRecompensas();
+  if (seed) {
+    addVenta("mentoria", 1800, "");
+    addAlianza("BNI — referidos del mes", 0);
+    buildRecompensas();
+  }
   calcSim();
   buildDashboard();
 }
@@ -2460,6 +2952,7 @@ function removeDeuda(i) {
 
 // ════ MAIN CALCULATOR ════
 function calcSim() {
+  scheduleSave();
   // Totales del mes activo
   let ventaTotal = 0;
   Object.values(allVentas[simMes]).forEach(v => ventaTotal += (parseFloat(v.monto)||0));
@@ -3132,8 +3625,16 @@ function removeRecompTab(id) {
 }
 
 // ═══ INIT ═══
-buildVentas();
-buildSim();
+// El arranque ahora pasa por initAuth(): si Supabase está configurado pide
+// login y carga el estado guardado; si no, corre en modo local.
+window.addEventListener("DOMContentLoaded", initAuth);
+
+// PWA: registrar el service worker (solo en https / localhost)
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(err => console.warn("SW no registrado:", err));
+  });
+}
 
 // ─── COUNT-UP ANIMATION ───────────────────────────────────────────
 function countUpEl(el, rawText, dur=650) {
