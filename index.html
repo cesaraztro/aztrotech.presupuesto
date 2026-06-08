@@ -1362,6 +1362,7 @@ function serializeState() {
     alianzas: allAlianzas,
     recompensas: recompensas,
     wishlist: wishlistItems,
+    logradas: LOGRADAS_NOTION,
     snowballTargetIdx: snowballTargetIdx,
     simMes: simMes,
     snapshots: debtSnapshots,
@@ -1409,6 +1410,9 @@ function applyState(s) {
     wishlistItems = s.wishlist;
     wishlistCount = wishlistItems.reduce((mx, w) => Math.max(mx, w.id || 0), 0);
   } else { initWishlist(); }
+
+  // Logradas (recompensas ya conseguidas)
+  if (Array.isArray(s.logradas)) LOGRADAS_NOTION = s.logradas;
 
   // Reconstruir TODA la UI desde los datos cargados
   buildVentas();
@@ -2582,7 +2586,7 @@ function removeAlianza(id) {
 const RECOMP_INIT = [];
 
 // Recompensas ya ganadas (vacío por defecto en el producto).
-const LOGRADAS_NOTION = [];
+let LOGRADAS_NOTION = [];
 
 // Wishlist vacía por defecto.
 const WISHLIST_SEED = [];
