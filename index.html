@@ -1480,9 +1480,31 @@ async function enterApp(session) {
   document.getElementById("user-email").textContent = session.user.email || "";
   const state = await loadState();
   bootApp(state);
-  if (!state) { await saveState(); }   // primera vez: siembra la fila del usuario
+  // Restauración automática de los datos del fundador (solo su cuenta, solo si está vacía)
+  const seeded = await maybeSeedFounder();
+  if (!state && !seeded) { await saveState(); }   // primera vez: siembra la fila del usuario
   setSaveStatus("saved");
   toast("Bienvenido de vuelta 👋", "ok");
+}
+
+// Restaura los datos reales de César desde el respaldo del repo (backups/cesar-v1.json).
+// Solo aplica a su cuenta y solo si todavía no tiene deudas guardadas (no pisa datos reales).
+const FOUNDER_EMAIL = "cesarholguin61@gmail.com";
+async function maybeSeedFounder() {
+  if (!__session) return false;
+  const email = (__session.user.email || "").toLowerCase();
+  if (email !== FOUNDER_EMAIL) return false;
+  if (PROJ_DEBTS.length > 0) return false;   // ya tiene datos → no tocar
+  try {
+    const backup = await fetch("backups/cesar-v1.json", { cache: "no-store" }).then(r => r.json());
+    applyState(backup);
+    await saveState();
+    toast("Tus datos fueron restaurados ✅", "ok");
+    return true;
+  } catch (e) {
+    console.warn("maybeSeedFounder:", e);
+    return false;
+  }
 }
 
 // ── LOGIN / SIGNUP UI ──────────────────────────────────────────────
