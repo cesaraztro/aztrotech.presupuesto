@@ -1,14 +1,13 @@
 {
-  "_nota": "Respaldo de los datos reales de César extraídos del código v1 (commit ee6b274). Formato v1 consumible por migrateV1ToV2(). Usado para sembrar su cuenta en el producto v2.",
+  "_nota": "Respaldo de los datos reales de César. Deudas tomadas de su Notion (Destructor de Deudas) — 6 deudas, total $443,409.68. Tasas completadas desde el registro previo (Notion no las trackea). Recompensas: set previo (la página de recompensas es privada). Formato v1 consumible por applyState().",
+  "_actualizado": "2026-06-08 desde Notion",
   "debts": [
-    { "name": "💜 NU TDC", "saldo": 27914, "pago": 5000, "pago_min": 3000, "tasa_anual": 90, "note": "Tasa más alta. ¡Todo el excedente aquí!" },
-    { "name": "🪙 Plata Card", "saldo": 12970, "pago": 3000, "pago_min": 1500, "tasa_anual": 60, "note": "Tras liquidar NU, redirigir pagos." },
-    { "name": "👤 José Luis", "saldo": 6300, "pago": 600, "pago_min": 600, "tasa_anual": 0, "note": "Sin interés, casi liquidada." },
-    { "name": "💼 Kupy/Etna", "saldo": 20000, "pago": 2000, "pago_min": 0, "tasa_anual": 0, "note": "Compromiso personal AztroTech." },
-    { "name": "💳 TDC BBVA", "saldo": 107390, "pago": 8800, "pago_min": 3450, "tasa_anual": 45, "note": "Pago agresivo $8,800/mes." },
-    { "name": "👤 Alain G.", "saldo": 41810, "pago": 600, "pago_min": 600, "tasa_anual": 0, "note": "Sin interés." },
-    { "name": "🚗 Auto BBVA", "saldo": 206755, "pago": 10000, "pago_min": 8872, "tasa_anual": 18, "note": "Largo plazo, abonos a capital." },
-    { "name": "👩‍👧 Mamá", "saldo": 70000, "pago": 1000, "pago_min": 0, "tasa_anual": 0, "note": "Deuda familiar, acordar pagos." }
+    { "name": "💜 NU TDC", "saldo": 28206.03, "pago": 3000, "pago_min": 1500, "tasa_anual": 90, "note": "Abonar ~$3,000/mes. Liquidar Nu este cierre de año." },
+    { "name": "🪙 Plata Card", "saldo": 13253.46, "pago": 1500, "pago_min": 1000, "tasa_anual": 60, "note": "Liquidar primero (menor saldo). No usar para gasto diario." },
+    { "name": "👤 José Luis", "saldo": 6900, "pago": 1000, "pago_min": 500, "tasa_anual": 0, "note": "Préstamo personal. Validar saldo actualizado." },
+    { "name": "💳 TDC BBVA", "saldo": 109471.82, "pago": 3450, "pago_min": 3202.95, "tasa_anual": 45, "note": "Reestructura: cada $3,450 reduce ~$3,406.87 el saldo." },
+    { "name": "🚗 Crédito Auto BBVA", "saldo": 215578.37, "pago": 8778.83, "pago_min": 7778.83, "tasa_anual": 18, "note": "Mantener al corriente. Abonos a capital al liquidar menores." },
+    { "name": "👩‍👧 Mamá", "saldo": 70000, "pago": 1000, "pago_min": 1000, "tasa_anual": 0, "note": "Préstamo personal familiar." }
   ],
   "planData": [
     { "pkgId": "mentoria", "plan": [2, 3, 3, 4, 5, 5, 6] },
