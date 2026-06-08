@@ -1,15 +1,21 @@
 /* AztroTech Presupuesto — Service Worker (PWA offline) */
-const CACHE = "azt-presupuesto-v2";
+const CACHE = "azt-presupuesto-product-v3";
 
 // Shell + librerías de CDN para arranque offline
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./assets/styles.css",
+  "./assets/state.js",
+  "./assets/finance.js",
+  "./assets/calendar.js",
+  "./assets/app.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./icons/icon-maskable-512.png",
+  "https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800;900&display=swap",
   "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
-  "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
 ];
 
